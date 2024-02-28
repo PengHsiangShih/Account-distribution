@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+    table, td{
+      border:1px solid black;
+      font-size:14px;
+    }
+    body {
+  background-color: lightblue;
+    }
+    </style>
+  </head>
+  <body>
+    <h3>2023「樹德盃」全國高中職校園投資交易模擬競賽報名查詢</h3>
+    <h3>請輸入您在報名時填寫的姓名</h3>
+    <label>姓名:</label><input type='text' class="input_1" id='name_1'>
+    <br>
+    <h3>請輸入您在報名時填寫的手機號碼</h3>
+    <label>手機號碼:</label><input type='text' class="input_1" id='phone_number_1'>
+    <br>
+    <h3>請輸入您在報名時填寫的Line ID</h3>
+    <label>Line_ID:</label><input type='text' class="input_1" id='Line_ID_1'>
+    <br>
+    <h3>請選擇您在報名時填寫的年級</h3>
+    <br>
+    <select id="group_1" onchange="changeCollege(this.selectedIndex)"></select>
+    <br>
+    <br>
+    <button class="table_button" id="show_table">開始查詢</button>
+    <br>
+    <button id="refresh_button">重新輸入</button>
+    <br>
+    <h3 id="message_1"></h3>
+    <br>
+    <table id="table">
+    </table>
+    <br>
+    <h3 class="sign_up" id="team"></h3>
+    <br>
+    <h3 class="sign_up" id="tutor"></h3>
+    <br>
+    <h3 class="sign_up" id="first_member"></h3>
+    <br>
+    <h3 class="sign_up" id="second_member"></h3>
+    <br>
+    <h3 class="sign_up" id="third_member"></h3>
+  </body>
+</html>
+
+<script>
+
+//Dropdown menu object
+let groups = ['請選擇您的年級','1','2','3'];
+let group_select = document.getElementById('group_1');
+let inner="";
+for(var i=0; i<groups.length;i++){
+  inner = inner+'<option value=i>'+groups[i]+'</option>';
+}
+group_select.innerHTML=inner;
+
+//Button object
+let table_button = document.getElementById('show_table');
+let refresh_button = document.getElementById('refresh_button')
+let test_button = document.getElementById('test_1');
+//Message object
+let message_1 = document.getElementById('message_1');
+//Table object
+const table_1 = document.getElementById('table');
+
+
+//Search button event
+table_button.addEventListener("click",function(){
+  table_1.innerHTML = '';
+  var user_name = document.getElementsByClassName('input_1')[0].value;
+  var school_name = document.getElementsByClassName('input_1')[1].value;
+  var Line_ID = document.getElementsByClassName('input_1')[2].value;
+  var group_name = document.querySelector('#group_1');
+  var output = group_name.options[group_name.selectedIndex].text;
+  if (output==='請選擇您的年級'){
+    alert('您未選擇年級');
+  }else{
+    message_1.innerText = '正在查詢中';
+    var input_array_1 = [user_name, school_name, Line_ID, output];
+    console.log(input_array_1);
+    google.script.run.withSuccessHandler(show_match_func).search_name(input_array_1);
+}
+})
+
+//Refresh button event
+refresh_button.addEventListener("click",function(){
+  refresh_func()
+})
+
+//Test button event
+test_button.addEventListener("click",function(){
+  test_1_func()
+})
+
+function refresh_func(){
+  document.getElementById('name_1').value='';
+  document.getElementById('phone_number_1').value='';
+  document.getElementById('Line_ID_1').value='';
+  message_1.innerText = '';
+  table_1.innerHTML = '';
+}
+
+function show_match_func(match_result){  
+  if (match_result===(-1)){
+    message_1.innerText = '沒有找到報名資料，請重新檢查輸入是否正確。報名完成後，系統會自動寄出電子郵件，內含報名資料。'
+    console.log('沒有找到資料')
+  }else{
+    message_1.innerText = ''
+    var row_array = ['隊名：', '指導老師：', '第一位組員：', '第二位組員：', '第三位組員：','正式競賽帳號','密碼'];
+    var row_array_3 = [];
+    for(var i=0; i<row_array.length; i++){
+    row_array_3.push([row_array[i], match_result[i]])
+    }
+    for(var i=0; i<row_array_3.length; i++){
+      add_row(row_array_3[i])
+    }
+    if (match_result[match_result.length-1]===('無操作紀錄')){
+      message_1.innerText = '您未有成交紀錄'
+    }else if(match_result[match_result.length-1]===('獎狀')){
+      message_1.innerText = '您有獲得獎項，我們會把獎狀紙本送至您就讀的學校'
+    }else{
+      add_hyperlink_row(match_result[match_result.length-1]);
+    }
+  } 
+  console.log(match_result);
+}
+
+//Add row function
+function add_row(table_array) {
+    let arr = table_array;
+    const row = document.createElement('tr');
+    for (const obj of arr) {
+        const col = document.createElement('td');
+        col.textContent = obj;
+        row.appendChild(col);      
+    }
+    table_1.appendChild(row);
+}
+
+//Add row with hyperlink
+function add_hyperlink_row(link_1){
+    var row = document.createElement('tr');
+    var col = document.createElement('td');
+    col.textContent = '參賽證明';
+    row.appendChild(col);
+    var certisfication_element = document.createElement('td');
+    var link = document.createElement('a');
+    link.setAttribute('href', link_1);
+    link.setAttribute('target', '_blank');
+    link.text = '請按此下載';
+    certisfication_element.appendChild(link);
+    row.appendChild(certisfication_element);
+    table_1.appendChild(row);
+}
+
+</script>
